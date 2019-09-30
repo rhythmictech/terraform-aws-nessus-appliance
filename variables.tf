@@ -83,3 +83,13 @@ variable "r53_zone_id" {
   type = string
   default = ""
 }
+
+variable "allowed_admin_security_group_id" {
+  type = string
+  default = ""
+}
+
+variable "allowed_security_group_id" {
+  type = string
+  default = ""
+}

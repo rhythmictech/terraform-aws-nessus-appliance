@@ -4,28 +4,6 @@ resource "aws_security_group" "nessus" {
   name_prefix = "${var.env}-${var.scanner_name}-"
   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port   = 8834
-    to_port     = 8834
-    protocol    = "tcp"
-    cidr_blocks = var.allowed_cidrs
-  }
-
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = var.allowed_admin_cidrs
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = merge(
     local.common_tags,
     map(
@@ -36,6 +14,53 @@ resource "aws_security_group" "nessus" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_security_group_rule" "nessus_allow_cidrs" {
+  type                      = "ingress"
+  from_port                 = 8834
+  to_port                   = 8834
+  protocol                  = "tcp"
+  cidr_blocks               = var.allowed_cidrs
+  security_group_id         = aws_security_group.nessus.id
+}
+
+resource "aws_security_group_rule" "nessus_allow_admin_cidrs" {
+  type                      = "ingress"
+  from_port                 = 22
+  to_port                   = 22
+  protocol                  = "tcp"
+  cidr_blocks               = var.allowed_admin_cidrs
+  security_group_id         = aws_security_group.nessus.id
+}
+
+resource "aws_security_group_rule" "nessus_allow_sgs" {
+  count                     = var.allowed_security_group_id != "" ? 1 : 0
+  type                      = "ingress"
+  from_port                 = 8834
+  to_port                   = 8834
+  protocol                  = "tcp"
+  security_group_id         = aws_security_group.nessus.id
+  source_security_group_id  = var.allowed_security_group_id
+}
+
+resource "aws_security_group_rule" "nessus_allow_admin_sgs" {
+  count                     = var.allowed_admin_security_group_id != "" ? 1 : 0
+  type                      = "ingress"
+  from_port                 = 22
+  to_port                   = 22
+  protocol                  = "tcp"
+  security_group_id         = aws_security_group.nessus.id
+  source_security_group_id  = var.allowed_admin_security_group_id
+}
+
+resource "aws_security_group_rule" "nessus_allow_egress" {
+  type                      = "egress"
+  from_port                 = 0
+  to_port                   = 0
+  protocol                  = "-1"
+  cidr_blocks               = ["0.0.0.0/0"]
+  security_group_id         = aws_security_group.nessus.id
 }
 
 data "aws_iam_policy_document" "nessus_assume_role" {
@@ -160,7 +185,7 @@ resource "aws_route53_record" "nessus_dns_name_eip" {
   name      = var.r53_address_prefix
   type      = "A"
   ttl       = "60"
-  records = [aws_eip.nessus_eip[0].public_ip]
+  records   = [aws_eip.nessus_eip[0].public_ip]
 }
 
 resource "aws_route53_record" "nessus_dns_name_instance" {
@@ -169,5 +194,5 @@ resource "aws_route53_record" "nessus_dns_name_instance" {
   name      = var.r53_address_prefix
   type      = "A"
   ttl       = "60"
-  records = [aws_instance.nessus.private_ip]
+  records   = [aws_instance.nessus.private_ip]
 }
