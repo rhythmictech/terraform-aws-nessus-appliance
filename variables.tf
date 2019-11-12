@@ -46,7 +46,7 @@ variable "additional_tags" {
 }
 
 variable "instance_type" {
-  type = string
+  type    = string
   default = "m4.xlarge"
 }
 
@@ -55,41 +55,41 @@ variable "subnet_id" {
 }
 
 variable "root_volume_size" {
-  type = number
+  type    = number
   default = 50
 }
 
 variable "use_byol" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "create_eip" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "create_r53_address" {
-  type= bool
+  type    = bool
   default = true
 }
 
 variable "r53_address_prefix" {
-  type = string
+  type    = string
   default = "nessus"
 }
 
 variable "r53_zone_id" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "allowed_admin_security_group_id" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "allowed_security_group_id" {
-  type = string
+  type    = string
   default = ""
 }
