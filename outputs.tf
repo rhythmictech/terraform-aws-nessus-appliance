@@ -1,19 +1,29 @@
 output "instance_id" {
-  value = aws_instance.nessus.id
+  description = "Instance ID"
+  value       = aws_instance.this.id
 }
 
-output "private_ip" {
-  value = aws_instance.nessus.private_ip
+output "lb_arn" {
+  description = "ARN of the ELB"
+  value       = try(aws_lb.this[0].arn, null)
 }
 
-output "eip_available" {
-  value = var.create_eip
-}
-output "eip_address" {
-  value = var.create_eip ? aws_eip.nessus_eip[0].public_ip : ""
+output "lb_dns_name" {
+  description = "DNS Name of the ELB"
+  value       = try(aws_lb.this[0].dns_name, null)
 }
 
-output "nessus_dns_address" {
-  value = var.create_r53_address ? (var.create_eip ? aws_route53_record.nessus_dns_name_eip[0].fqdn : aws_route53_record.nessus_dns_name_instance[0].fqdn) : ""
+output "lb_listener_arn" {
+  description = "ARN of the ELB Listener"
+  value       = try(aws_lb_listener.this[0].arn, null)
 }
 
+output "lb_zone_id" {
+  description = "Route53 Zone ID of the ELB"
+  value       = try(aws_lb.this[0].zone_id, null)
+}
+
+output "role_arn" {
+  description = "IAM Role ARN of the instance"
+  value       = aws_iam_role.this.arn
+}
